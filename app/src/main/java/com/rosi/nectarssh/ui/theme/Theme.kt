@@ -1,4 +1,4 @@
-package com.rosiapps.tunnel.ui.theme
+package com.rosi.nectarssh.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -34,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun MyTunnelTheme(
+fun NectarSSHTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

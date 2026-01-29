@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MyTunnel"
+rootProject.name = "NectarSSH"
 include(":app")
