@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -10,18 +16,66 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyTunnel">
+        android:theme="@style/Theme.NectarSSH"
+        android:requestLegacyExternalStorage="true">
         <activity
-            android:name=".MainActivity"
+            android:name="com.rosi.nectarssh.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.MyTunnel">
+            android:theme="@style/Theme.NectarSSH">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.rosi.nectarssh.ConnectionManageActivity"
+            android:exported="false"
+            android:label="Manage Connections"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
+            android:name="com.rosi.nectarssh.SettingsActivity"
+            android:exported="false"
+            android:label="Settings"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
+            android:name="com.rosi.nectarssh.ConnectionActivity"
+            android:exported="false"
+            android:label="New Connection"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
+            android:name="com.rosi.nectarssh.IdentityActivity"
+            android:exported="false"
+            android:label="New Identity"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
+            android:name="com.rosi.nectarssh.PortForwardActivity"
+            android:exported="false"
+            android:label="Port Forward"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
+            android:name="com.rosi.nectarssh.ui.connection.ConnectionLogActivity"
+            android:exported="false"
+            android:label="Connection Logs"
+            android:theme="@style/Theme.NectarSSH"
+            android:launchMode="singleTop" />
+        <activity
+            android:name="com.rosi.nectarssh.ImportActivity"
+            android:exported="true"
+            android:label="Import Configuration"
+            android:theme="@style/Theme.NectarSSH">
+            <intent-filter>
+                <action android:name="com.rosi.nectarssh.IMPORT_DATA" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/json" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name="com.rosi.nectarssh.service.SSHTunnelService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package com.rosiapps.tunnel.ui.theme
+package com.rosi.nectarssh.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

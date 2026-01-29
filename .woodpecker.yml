@@ -1,0 +1,114 @@
+steps:
+  - name: restore-cache
+    image: meltwater/drone-cache
+    pull: true
+    settings:
+      backend: filesystem
+      restore: true
+      # Combined key ensures cache busts if either dependencies or Gradle version changes
+      cache_key: gradle-cache-{{ checksum "app/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      archive_format: tar
+      mount:
+        - .gradle
+        - .gradle_home
+        - .android_sdk
+    volumes:
+      - /tmp/cache:/tmp/cache
+
+  - name: build
+    image: cimg/android:2024.01.1
+    resources:
+      limits:
+        cpu: 1
+        memory: 3Gi
+    environment:
+      GRADLE_USER_HOME: .gradle_home
+      ANDROID_HOME: .android_sdk
+      ANDROID_SDK_ROOT: .android_sdk
+      DEBUG_KEYSTORE_RAW:
+        from_secret: debug_keystore_base64
+    commands:
+      # 1. Take ownership of the restored cache files
+      # 'sudo' is usually available in cimg images; if not, use 'chown -R $(id -u):$(id -g) .'
+      - sudo chown -R circleci:circleci .gradle_home .android_sdk .gradle || true
+
+      # 2. Decode the keystore file from the secret
+      - echo "$DEBUG_KEYSTORE_RAW" | base64 --decode > debug.keystore
+      - echo "current folder"
+      - pwd
+      - ls -l
+      - export DEBUG_KEYSTORE_PATH=`pwd`/debug.keystore
+
+
+      # 2. Clean up any leftover lock files from a previous crashed/interrupted build
+      - find .gradle_home -name "*.lck" -type f -delete || true
+      - find .gradle_home -name "*.lock" -type f -delete || true
+
+      # Pre-accept licenses so the build doesn't hang
+      - yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses || true
+      - sh ./gradlew assembleDebug --no-daemon --no-parallel -Dorg.gradle.workers.max=1
+
+#  - name: test
+#    image: cimg/android:2024.01.1
+#    commands:
+#      - sh ./gradlew test
+
+  - name: rebuild-cache
+    image: meltwater/drone-cache
+    pull: true
+    settings:
+      backend: filesystem
+      rebuild: true
+      cache_key: gradle-cache-{{ checksum "app/build.gradle.kts" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      archive_format: tar
+      mount:
+        - .gradle
+        - .gradle_home
+        - .android_sdk
+    volumes:
+      - /tmp/cache:/tmp/cache
+
+  - name: prepare-release
+    image: cimg/android:2024.01.1
+    commands:
+      - mkdir -p artifacts/nectarssh
+      - cp app/build/outputs/apk/debug/*.apk artifacts/nectarssh/
+      - ls -la artifacts/nectarssh/
+    when:
+      branch: main
+
+  - name: publish-github-release
+    image: woodpeckerci/plugin-release
+    settings:
+      api_key:
+        from_secret: github_token
+      files:
+        - app/build/outputs/apk/debug/*.apk
+      base_url: https://api.github.com
+      upload_url: https://uploads.github.com/
+      title: ${CI_COMMIT_TAG}
+      prerelease: false
+      draft: false
+    when:
+      event: tag
+
+  - name: notify_email
+    image: deblan/woodpecker-email
+    settings:
+      dsn:
+        from_secret: mail_dsn
+      from:
+        address:
+          from_secret: mail_from_address
+        name: "Woodpecker CI"
+      recipients:
+        from_secret: mail_recipients
+      recipients_only: false
+      content:
+        subject: "[{{ pipeline.status }}] {{ repo.full_name }} ({{ commit.branch }} - {{ commit.sha[0:8] }})"
+        body: |
+          {{ commit.sha }}<br>
+          {{ pipeline.status }}<br>
+    when:
+      status: [ success, failure ]
+

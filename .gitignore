@@ -19,6 +19,7 @@ out/
 
 # Gradle files
 .gradle/
+.gradle-home/
 */build/
 /build/
 
@@ -96,3 +97,6 @@ lint/tmp/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+/.idea/
+/prv/
+/stuff/

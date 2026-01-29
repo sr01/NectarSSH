@@ -1,4 +1,4 @@
-package com.rosiapps.tunnel
+package com.rosi.nectarssh
 
 import org.junit.Test
 
