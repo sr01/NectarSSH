@@ -80,6 +80,7 @@ fun PortForwardScreen(
     var localPort by remember { mutableStateOf(existingPortForward?.localPort?.toString() ?: "") }
     var remoteHost by remember { mutableStateOf(existingPortForward?.remoteHost ?: "127.0.0.1") }
     var remotePort by remember { mutableStateOf(existingPortForward?.remotePort?.toString() ?: "") }
+    var browserUrl by remember { mutableStateOf(existingPortForward?.browserUrl ?: "") }
     var selectedConnectionId by remember {
         mutableStateOf(existingPortForward?.connectionId ?: preselectedConnectionId ?: "")
     }
@@ -112,7 +113,8 @@ fun PortForwardScreen(
                                     localPort = localPort.toInt(),
                                     remoteHost = remoteHost,
                                     remotePort = remotePort.toInt(),
-                                    enabled = existingPortForward?.enabled ?: true
+                                    enabled = existingPortForward?.enabled ?: true,
+                                    browserUrl = browserUrl.ifBlank { null }
                                 )
                                 onSave(portForward)
                             }
@@ -225,6 +227,23 @@ fun PortForwardScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 supportingText = { Text("Port on remote host to forward to") }
+            )
+
+            HorizontalDivider()
+
+            Text(
+                text = "Browser",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            OutlinedTextField(
+                value = browserUrl,
+                onValueChange = { browserUrl = it },
+                label = { Text("Open URL after connect (optional)") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("http://localhost:{localPort}/") },
+                supportingText = { Text("Use {localPort} as placeholder. Leave empty to disable.") }
             )
         }
     }

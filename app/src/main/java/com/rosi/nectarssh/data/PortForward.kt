@@ -10,5 +10,6 @@ data class PortForward(
     val localPort: Int,
     val remoteHost: String,
     val remotePort: Int,
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+    val browserUrl: String? = null
 )
