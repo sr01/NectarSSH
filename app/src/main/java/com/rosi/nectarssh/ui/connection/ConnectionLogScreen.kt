@@ -22,6 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import com.rosi.nectarssh.data.ConnectionStatus
 import com.rosi.nectarssh.data.LogEntry
 import com.rosi.nectarssh.data.LogLevel
@@ -45,8 +48,10 @@ fun ConnectionLogScreen(
     onKeepRunning: () -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     var sessionState by remember { mutableStateOf<SessionState?>(null) }
     var loadingFailed by remember { mutableStateOf(false) }
+    var browserOpened by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     var showDisconnectDialog by remember { mutableStateOf(false) }
     var showPassphraseDialog by remember { mutableStateOf(false) }
@@ -80,7 +85,20 @@ fun ConnectionLogScreen(
         stateFlow?.collect { newState ->
             loadingFailed = false // Reset failed state if we get updates
             val oldLogSize = sessionState?.logs?.size ?: 0
+            val previousStatus = sessionState?.status
             sessionState = newState
+
+            if (newState.status == ConnectionStatus.CONNECTED && previousStatus != ConnectionStatus.CONNECTED && !browserOpened) {
+                browserOpened = true
+                newState.portForwards.forEach { pf ->
+                    pf.browserUrl?.takeIf { it.isNotBlank() }?.let { urlTemplate ->
+                        val resolvedUrl = urlTemplate.replace("{localPort}", pf.localPort.toString())
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(resolvedUrl)))
+                        } catch (_: Exception) { }
+                    }
+                }
+            }
 
             // Auto-finish activity if disconnected from external source (like notification)
             if (newState.status == ConnectionStatus.DISCONNECTED) {
