@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.rosi.nectarssh.data.ConnectionStatus
 import com.rosi.nectarssh.data.LogEntry
@@ -95,7 +96,9 @@ fun ConnectionLogScreen(
                         val resolvedUrl = urlTemplate.replace("{localPort}", pf.localPort.toString())
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(resolvedUrl)))
-                        } catch (_: Exception) { }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Failed to open browser: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
