@@ -61,6 +61,7 @@ class BatchPortForwardActivity : ComponentActivity() {
 }
 
 data class PortForwardRowState(
+    val nickname: String = "",
     val localPort: String = "",
     val remoteHost: String = "127.0.0.1",
     val remotePort: String = ""
@@ -108,7 +109,7 @@ fun BatchPortForwardScreen(
                                         PortForward(
                                             id = UUID.randomUUID().toString(),
                                             connectionId = selectedConnectionId,
-                                            nickname = "L${row.localPort} -> ${row.remoteHost}:${row.remotePort}",
+                                            nickname = row.nickname.ifBlank { "L${row.localPort} -> ${row.remoteHost}:${row.remotePort}" },
                                             localPort = row.localPort.toInt(),
                                             remoteHost = row.remoteHost,
                                             remotePort = row.remotePort.toInt(),
@@ -220,9 +221,19 @@ fun PortForwardRowEditor(
             modifier = Modifier
                 .padding(12.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = row.nickname,
+                    onValueChange = { onUpdate(row.copy(nickname = it)) },
+                    label = { Text("Nickname (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
