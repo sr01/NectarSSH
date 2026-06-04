@@ -73,7 +73,11 @@ jobs:
       - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
-          connection_url: ${{ secrets.MAIL_DSN }}
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
           from: ${{ secrets.MAIL_FROM_ADDRESS }}
           to: ${{ secrets.MAIL_RECIPIENTS }}
           subject: "[${{ needs.build.result }}] ${{ github.repository }} (${{ github.ref_name }} - ${{ github.sha }})"
