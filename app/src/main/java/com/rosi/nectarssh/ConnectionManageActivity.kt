@@ -188,6 +188,7 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                             action = SSHTunnelService.ACTION_START_SESSION
                             putExtra(SSHTunnelService.EXTRA_CONNECTION_ID, connection.id)
                             putExtra(SSHTunnelService.EXTRA_SESSION_ID, sessionId)
+                            putExtra(SSHTunnelService.EXTRA_PORT_FORWARD_ID, portForward.id)
                         }
                         context.startService(serviceIntent)
                         val logIntent = Intent().apply {
