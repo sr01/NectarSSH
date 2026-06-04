@@ -38,6 +38,13 @@ class PortForwardStorage(private val context: Context) {
         return portForwards
     }
 
+    fun addPortForwards(newPortForwards: List<PortForward>): List<PortForward> {
+        val portForwards = loadPortForwards().toMutableList()
+        portForwards.addAll(newPortForwards)
+        savePortForwards(portForwards)
+        return portForwards
+    }
+
     fun updatePortForward(portForward: PortForward): List<PortForward> {
         val portForwards = loadPortForwards().toMutableList()
         val index = portForwards.indexOfFirst { it.id == portForward.id }

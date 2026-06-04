@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -96,6 +97,14 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
         }
     }
 
+    val batchPortForwardLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            portForwardsRefresh++
+        }
+    }
+
     val connectionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -119,6 +128,16 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (selectedTabIndex == 0) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, BatchPortForwardActivity::class.java)
+                            batchPortForwardLauncher.launch(intent)
+                        }) {
+                            Icon(Icons.Default.PlaylistAdd, contentDescription = "Batch Add")
+                        }
                     }
                 }
             )
