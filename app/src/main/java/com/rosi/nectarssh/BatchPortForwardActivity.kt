@@ -63,7 +63,7 @@ class BatchPortForwardActivity : ComponentActivity() {
 data class PortForwardRowState(
     val nickname: String = "",
     val localPort: String = "",
-    val remoteHost: String = "127.0.0.1",
+    val remoteHost: String = "",
     val remotePort: String = ""
 )
 

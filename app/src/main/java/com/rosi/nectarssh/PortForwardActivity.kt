@@ -78,7 +78,7 @@ fun PortForwardScreen(
     val isEditMode = existingPortForward != null
     var nickname by remember { mutableStateOf(existingPortForward?.nickname ?: "") }
     var localPort by remember { mutableStateOf(existingPortForward?.localPort?.toString() ?: "") }
-    var remoteHost by remember { mutableStateOf(existingPortForward?.remoteHost ?: "127.0.0.1") }
+    var remoteHost by remember { mutableStateOf(existingPortForward?.remoteHost ?: "") }
     var remotePort by remember { mutableStateOf(existingPortForward?.remotePort?.toString() ?: "") }
     var browserUrl by remember { mutableStateOf(existingPortForward?.browserUrl ?: "") }
     var selectedConnectionId by remember {
