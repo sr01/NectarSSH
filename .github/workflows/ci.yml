@@ -64,24 +64,3 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*.apk
-
-  notify:
-    needs: build
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Send email notification
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          from: ${{ secrets.MAIL_FROM_ADDRESS }}
-          to: ${{ secrets.MAIL_RECIPIENTS }}
-          subject: "[${{ needs.build.result }}] ${{ github.repository }} (${{ github.ref_name }} - ${{ github.sha }})"
-          body: |
-            Commit: ${{ github.sha }}
-            Status: ${{ needs.build.result }}
-            Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
