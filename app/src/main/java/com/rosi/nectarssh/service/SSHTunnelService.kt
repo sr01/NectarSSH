@@ -139,7 +139,8 @@ class SSHTunnelService : Service() {
                 val portForwards = if (portForwardId != null) {
                     listOfNotNull(portForwardStorage.getPortForward(portForwardId))
                 } else {
-                    emptyList()
+                    portForwardStorage.getPortForwardsForConnection(connectionId)
+                        .filter { it.enabled }
                 }
 
                 val nickname = portForwards.firstOrNull()?.nickname ?: connection.nickname
