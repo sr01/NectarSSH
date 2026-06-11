@@ -61,6 +61,11 @@
             android:label="Batch Add Port Forwards"
             android:theme="@style/Theme.NectarSSH" />
         <activity
+            android:name="com.rosi.nectarssh.PortForwardGroupActivity"
+            android:exported="false"
+            android:label="Port Forward Group"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
             android:name="com.rosi.nectarssh.ui.connection.ConnectionLogActivity"
             android:exported="false"
             android:label="Connection Logs"

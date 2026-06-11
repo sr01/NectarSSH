@@ -16,6 +16,7 @@ object ImportExportManager {
         val identityStorage = IdentityStorage(context)
         val connectionStorage = ConnectionStorage(context)
         val portForwardStorage = PortForwardStorage(context)
+        val groupStorage = PortForwardGroupStorage(context)
 
         // Load all identities and convert to ExportIdentity with base64-encoded keys
         val exportIdentities = identityStorage.loadIdentities().map { identity ->
@@ -41,7 +42,8 @@ object ImportExportManager {
             exportDate = Instant.now().toString(),
             identities = exportIdentities,
             connections = connectionStorage.loadConnections(),
-            portForwards = portForwardStorage.loadPortForwards()
+            portForwards = portForwardStorage.loadPortForwards(),
+            portForwardGroups = groupStorage.loadGroups()
         )
 
         return Json.encodeToString(exportData)
@@ -65,6 +67,7 @@ object ImportExportManager {
             val identityStorage = IdentityStorage(context)
             val connectionStorage = ConnectionStorage(context)
             val portForwardStorage = PortForwardStorage(context)
+            val groupStorage = PortForwardGroupStorage(context)
 
             // 2. Clear ALL existing data
             // Delete all identities (including their key files)
@@ -72,9 +75,10 @@ object ImportExportManager {
                 identityStorage.deleteIdentity(identity.id)
             }
 
-            // Clear connections and port forwards
+            // Clear connections, port forwards, and groups
             connectionStorage.saveConnections(emptyList())
             portForwardStorage.savePortForwards(emptyList())
+            groupStorage.saveGroups(emptyList())
 
             // 3. Import identities with key reconstruction
             exportData.identities.forEach { exportIdentity ->
@@ -101,12 +105,16 @@ object ImportExportManager {
             // 5. Import port forwards
             portForwardStorage.savePortForwards(exportData.portForwards)
 
+            // 6. Import port forward groups
+            groupStorage.saveGroups(exportData.portForwardGroups)
+
             ImportResult(
                 success = true,
                 message = "Import successful",
                 identityCount = exportData.identities.size,
                 connectionCount = exportData.connections.size,
-                portForwardCount = exportData.portForwards.size
+                portForwardCount = exportData.portForwards.size,
+                portForwardGroupCount = exportData.portForwardGroups.size
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -135,7 +143,8 @@ object ImportExportManager {
                     message = "Valid import data",
                     identityCount = exportData.identities.size,
                     connectionCount = exportData.connections.size,
-                    portForwardCount = exportData.portForwards.size
+                    portForwardCount = exportData.portForwards.size,
+                    portForwardGroupCount = exportData.portForwardGroups.size
                 )
             }
         } catch (e: Exception) {

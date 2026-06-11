@@ -8,7 +8,8 @@ data class ExportData(
     val exportDate: String,
     val identities: List<ExportIdentity>,
     val connections: List<Connection>,
-    val portForwards: List<PortForward>
+    val portForwards: List<PortForward>,
+    val portForwardGroups: List<PortForwardGroup> = emptyList()
 )
 
 @Serializable
@@ -27,5 +28,6 @@ data class ImportResult(
     val message: String,
     val identityCount: Int = 0,
     val connectionCount: Int = 0,
-    val portForwardCount: Int = 0
+    val portForwardCount: Int = 0,
+    val portForwardGroupCount: Int = 0
 )
