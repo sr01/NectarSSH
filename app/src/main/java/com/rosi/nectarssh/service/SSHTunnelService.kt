@@ -17,6 +17,7 @@ import com.rosi.nectarssh.data.LogEntry
 import com.rosi.nectarssh.data.LogLevel
 import com.rosi.nectarssh.data.PassphraseRequest
 import com.rosi.nectarssh.data.PassphraseResponse
+import com.rosi.nectarssh.data.PortForwardGroupStorage
 import com.rosi.nectarssh.data.PortForwardStorage
 import com.rosi.nectarssh.data.SessionState
 import com.rosi.nectarssh.util.PermissionHelper
@@ -54,6 +55,7 @@ class SSHTunnelService : Service() {
         const val EXTRA_CONNECTION_ID = "connection_id"
         const val EXTRA_SESSION_ID = "session_id"
         const val EXTRA_PORT_FORWARD_ID = "port_forward_id"
+        const val EXTRA_PORT_FORWARD_GROUP_ID = "port_forward_group_id"
     }
 
     private val activeSessions = ConcurrentHashMap<String, SessionState>()
@@ -91,8 +93,9 @@ class SSHTunnelService : Service() {
                 val connectionId = intent.getStringExtra(EXTRA_CONNECTION_ID)
                 val sessionId = intent.getStringExtra(EXTRA_SESSION_ID)
                 val portForwardId = intent.getStringExtra(EXTRA_PORT_FORWARD_ID)
+                val groupId = intent.getStringExtra(EXTRA_PORT_FORWARD_GROUP_ID)
                 if (connectionId != null && sessionId != null) {
-                    startSession(connectionId, sessionId, portForwardId)
+                    startSession(connectionId, sessionId, portForwardId, groupId)
                 }
             }
             ACTION_STOP_SESSION -> {
@@ -118,7 +121,7 @@ class SSHTunnelService : Service() {
         }
     }
 
-    fun startSession(connectionId: String, sessionId: String, portForwardId: String? = null) {
+    fun startSession(connectionId: String, sessionId: String, portForwardId: String? = null, groupId: String? = null) {
         if (activeSessions.containsKey(sessionId)) {
             Log.d(TAG, "Session $sessionId already starting or active")
             return
@@ -136,11 +139,20 @@ class SSHTunnelService : Service() {
                 val identity = identityStorage.getIdentity(connection.identityId)
                     ?: throw IllegalArgumentException("Identity not found")
 
-                val portForwards = if (portForwardId != null) {
-                    listOfNotNull(portForwardStorage.getPortForward(portForwardId))
-                } else {
-                    portForwardStorage.getPortForwardsForConnection(connectionId)
-                        .filter { it.enabled }
+                val portForwards = when {
+                    groupId != null -> {
+                        val groupStorage = PortForwardGroupStorage(this@SSHTunnelService)
+                        val group = groupStorage.getGroup(groupId)
+                            ?: throw IllegalArgumentException("Port forward group not found")
+                        group.portForwardIds.mapNotNull { portForwardStorage.getPortForward(it) }
+                    }
+                    portForwardId != null -> {
+                        listOfNotNull(portForwardStorage.getPortForward(portForwardId))
+                    }
+                    else -> {
+                        portForwardStorage.getPortForwardsForConnection(connectionId)
+                            .filter { it.enabled }
+                    }
                 }
 
                 val nickname = portForwards.firstOrNull()?.nickname ?: connection.nickname

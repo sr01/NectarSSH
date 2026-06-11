@@ -51,6 +51,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.rosi.nectarssh.data.Connection
 import com.rosi.nectarssh.data.ConnectionStorage
 import com.rosi.nectarssh.data.PortForward
+import com.rosi.nectarssh.data.PortForwardGroup
+import com.rosi.nectarssh.data.PortForwardGroupStorage
 import com.rosi.nectarssh.data.PortForwardStorage
 import com.rosi.nectarssh.data.RecentStorage
 import com.rosi.nectarssh.data.RecentType
@@ -88,6 +90,7 @@ fun MainDashboardScreen() {
     val recentStorage = remember { RecentStorage(context) }
     val connectionStorage = remember { ConnectionStorage(context) }
     val portForwardStorage = remember { PortForwardStorage(context) }
+    val groupStorage = remember { PortForwardGroupStorage(context) }
     
     var recentItems by remember { mutableStateOf(recentStorage.loadRecentItems().take(5)) }
     
@@ -214,6 +217,20 @@ fun MainDashboardScreen() {
                                     )
                                 }
                             }
+                            RecentType.PORT_FORWARD_GROUP -> {
+                                val group = groupStorage.getGroup(item.id)
+                                val connection = group?.let { connectionStorage.getConnection(it.connectionId) }
+                                if (group != null && connection != null) {
+                                    SettingsItem(
+                                        title = group.nickname,
+                                        subtitle = "${group.portForwardIds.size} port forwards via ${connection.nickname}",
+                                        icon = Icons.AutoMirrored.Filled.List,
+                                        onClick = {
+                                            connectGroup(context, group, recentStorage)
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                     item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
@@ -270,6 +287,25 @@ private fun connectPortForward(context: Context, pf: PortForward, connection: Co
         putExtra(SSHTunnelService.EXTRA_CONNECTION_ID, connection.id)
         putExtra(SSHTunnelService.EXTRA_SESSION_ID, sessionId)
         putExtra(SSHTunnelService.EXTRA_PORT_FORWARD_ID, pf.id)
+    }
+    context.startService(serviceIntent)
+
+    val logIntent = Intent().apply {
+        setClassName(context, "com.rosi.nectarssh.ui.connection.ConnectionLogActivity")
+        putExtra("session_id", sessionId)
+    }
+    context.startActivity(logIntent)
+}
+
+private fun connectGroup(context: Context, group: PortForwardGroup, recentStorage: RecentStorage) {
+    val sessionId = UUID.randomUUID().toString()
+    recentStorage.addRecentItem(group.id, RecentType.PORT_FORWARD_GROUP)
+
+    val serviceIntent = Intent(context, SSHTunnelService::class.java).apply {
+        action = SSHTunnelService.ACTION_START_SESSION
+        putExtra(SSHTunnelService.EXTRA_CONNECTION_ID, group.connectionId)
+        putExtra(SSHTunnelService.EXTRA_SESSION_ID, sessionId)
+        putExtra(SSHTunnelService.EXTRA_PORT_FORWARD_GROUP_ID, group.id)
     }
     context.startService(serviceIntent)
 

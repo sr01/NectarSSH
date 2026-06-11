@@ -38,8 +38,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -58,6 +58,8 @@ import com.rosi.nectarssh.data.ConnectionStorage
 import com.rosi.nectarssh.data.Identity
 import com.rosi.nectarssh.data.IdentityStorage
 import com.rosi.nectarssh.data.PortForward
+import com.rosi.nectarssh.data.PortForwardGroup
+import com.rosi.nectarssh.data.PortForwardGroupStorage
 import com.rosi.nectarssh.data.PortForwardStorage
 import com.rosi.nectarssh.data.RecentStorage
 import com.rosi.nectarssh.data.RecentType
@@ -81,13 +83,22 @@ class ConnectionManageActivity : ComponentActivity() {
 @Composable
 fun ConnectionManageScreen(onBack: () -> Unit) {
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("Port Forwards", "Connections", "Identities")
+    val tabs = listOf("Groups", "Port Forwards", "Connections", "Identities")
     val context = LocalContext.current
+    var groupsRefresh by remember { mutableStateOf(0) }
     var portForwardsRefresh by remember { mutableStateOf(0) }
     var connectionsRefresh by remember { mutableStateOf(0) }
     var identitiesRefresh by remember { mutableStateOf(0) }
-    
+
     val recentStorage = remember { RecentStorage(context) }
+
+    val groupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            groupsRefresh++
+        }
+    }
 
     val portForwardLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -131,7 +142,7 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    if (selectedTabIndex == 0) {
+                    if (selectedTabIndex == 1) {
                         IconButton(onClick = {
                             val intent = Intent(context, BatchPortForwardActivity::class.java)
                             batchPortForwardLauncher.launch(intent)
@@ -145,15 +156,19 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 when (selectedTabIndex) {
-                    0 -> { // Port Forwards tab
+                    0 -> { // Groups tab
+                        val intent = Intent(context, PortForwardGroupActivity::class.java)
+                        groupLauncher.launch(intent)
+                    }
+                    1 -> { // Port Forwards tab
                         val intent = Intent(context, PortForwardActivity::class.java)
                         portForwardLauncher.launch(intent)
                     }
-                    1 -> { // Connections tab
+                    2 -> { // Connections tab
                         val intent = Intent(context, ConnectionActivity::class.java)
                         connectionLauncher.launch(intent)
                     }
-                    2 -> { // Identities tab
+                    3 -> { // Identities tab
                         val intent = Intent(context, IdentityActivity::class.java)
                         identityLauncher.launch(intent)
                     }
@@ -168,7 +183,10 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            TabRow(selectedTabIndex = selectedTabIndex) {
+            ScrollableTabRow(
+                selectedTabIndex = selectedTabIndex,
+                edgePadding = 0.dp
+            ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
@@ -179,7 +197,35 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
             }
 
             when (selectedTabIndex) {
-                0 -> PortForwardsTab(
+                0 -> GroupsTab(
+                    refreshTrigger = groupsRefresh,
+                    onGroupConnect = { group ->
+                        recentStorage.addRecentItem(group.id, RecentType.PORT_FORWARD_GROUP)
+                        val sessionId = UUID.randomUUID().toString()
+                        val serviceIntent = Intent(context, SSHTunnelService::class.java).apply {
+                            action = SSHTunnelService.ACTION_START_SESSION
+                            putExtra(SSHTunnelService.EXTRA_CONNECTION_ID, group.connectionId)
+                            putExtra(SSHTunnelService.EXTRA_SESSION_ID, sessionId)
+                            putExtra(SSHTunnelService.EXTRA_PORT_FORWARD_GROUP_ID, group.id)
+                        }
+                        context.startService(serviceIntent)
+                        val logIntent = Intent().apply {
+                            setClassName(context, "com.rosi.nectarssh.ui.connection.ConnectionLogActivity")
+                            putExtra("session_id", sessionId)
+                        }
+                        context.startActivity(logIntent)
+                    },
+                    onGroupEdit = { group ->
+                        val intent = Intent(context, PortForwardGroupActivity::class.java).apply {
+                            putExtra(PortForwardGroupActivity.EXTRA_GROUP_ID, group.id)
+                        }
+                        groupLauncher.launch(intent)
+                    },
+                    onGroupDelete = {
+                        groupsRefresh++
+                    }
+                )
+                1 -> PortForwardsTab(
                     refreshTrigger = portForwardsRefresh,
                     onPortForwardConnect = { portForward, connection ->
                         recentStorage.addRecentItem(portForward.id, RecentType.PORT_FORWARD)
@@ -207,7 +253,7 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                         portForwardsRefresh++
                     }
                 )
-                1 -> ConnectionsTab(
+                2 -> ConnectionsTab(
                     refreshTrigger = connectionsRefresh,
                     onConnectionClick = { connection ->
                         recentStorage.addRecentItem(connection.id, RecentType.CONNECTION)
@@ -234,13 +280,150 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                         connectionsRefresh++
                     }
                 )
-                2 -> IdentitiesTab(
+                3 -> IdentitiesTab(
                     refreshTrigger = identitiesRefresh,
                     onIdentityClick = { identity ->
                         val intent = Intent(context, IdentityActivity::class.java).apply {
                             putExtra(IdentityActivity.EXTRA_IDENTITY_ID, identity.id)
                         }
                         identityLauncher.launch(intent)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun GroupsTab(
+    refreshTrigger: Int,
+    onGroupConnect: (PortForwardGroup) -> Unit,
+    onGroupEdit: (PortForwardGroup) -> Unit,
+    onGroupDelete: () -> Unit
+) {
+    val context = LocalContext.current
+    val groupStorage = remember { PortForwardGroupStorage(context) }
+    val connectionStorage = remember { ConnectionStorage(context) }
+    var groups by remember { mutableStateOf(groupStorage.loadGroups()) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var groupToDelete by remember { mutableStateOf<PortForwardGroup?>(null) }
+
+    LaunchedEffect(refreshTrigger) {
+        groups = groupStorage.loadGroups()
+    }
+
+    if (groups.isEmpty()) {
+        EmptyListMessage("No groups")
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(groups) { group ->
+                val connection = connectionStorage.getConnection(group.connectionId)
+                val portForwardCount = group.portForwardIds.size
+
+                GroupListItem(
+                    group = group,
+                    connectionNickname = connection?.nickname ?: "Unknown",
+                    portForwardCount = portForwardCount,
+                    onClick = { onGroupConnect(group) },
+                    onEdit = { onGroupEdit(group) },
+                    onDelete = {
+                        groupToDelete = group
+                        showDeleteDialog = true
+                    }
+                )
+            }
+        }
+    }
+
+    if (showDeleteDialog && groupToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                groupToDelete = null
+            },
+            title = { Text("Delete Group") },
+            text = { Text("Are you sure you want to delete \"${groupToDelete!!.nickname}\"? Port forwards will not be deleted.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    groupStorage.deleteGroup(groupToDelete!!.id)
+                    groups = groupStorage.loadGroups()
+                    showDeleteDialog = false
+                    groupToDelete = null
+                    onGroupDelete()
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    groupToDelete = null
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun GroupListItem(
+    group: PortForwardGroup,
+    connectionNickname: String,
+    portForwardCount: Int,
+    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { showMenu = true }
+            )
+    ) {
+        Box {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = group.nickname,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "$portForwardCount port forwards via $connectionNickname",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = {
+                        showMenu = false
+                        onEdit()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = {
+                        showMenu = false
+                        onDelete()
                     }
                 )
             }

@@ -9,7 +9,8 @@ import java.io.File
 @Serializable
 enum class RecentType {
     CONNECTION,
-    PORT_FORWARD
+    PORT_FORWARD,
+    PORT_FORWARD_GROUP
 }
 
 @Serializable
