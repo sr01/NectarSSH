@@ -139,11 +139,13 @@ class SSHTunnelService : Service() {
                 val identity = identityStorage.getIdentity(connection.identityId)
                     ?: throw IllegalArgumentException("Identity not found")
 
+                var groupBrowserUrl: String? = null
                 val portForwards = when {
                     groupId != null -> {
                         val groupStorage = PortForwardGroupStorage(this@SSHTunnelService)
                         val group = groupStorage.getGroup(groupId)
                             ?: throw IllegalArgumentException("Port forward group not found")
+                        groupBrowserUrl = group.browserUrl
                         group.portForwardIds.mapNotNull { portForwardStorage.getPortForward(it) }
                     }
                     portForwardId != null -> {
@@ -173,7 +175,8 @@ class SSHTunnelService : Service() {
                     notificationId = notificationId,
                     sequenceNumber = sequenceNumber,
                     portForwards = portForwards,
-                    activeForwarderSockets = emptyList()
+                    activeForwarderSockets = emptyList(),
+                    groupBrowserUrl = groupBrowserUrl
                 )
 
                 logFlows[sessionId] = MutableSharedFlow(replay = 0)

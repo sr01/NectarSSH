@@ -18,7 +18,8 @@ data class SessionState(
     val notificationId: Int,
     val sequenceNumber: Int,         // Stable sequential number for notification display
     val portForwards: List<PortForward> = emptyList(),
-    val activeForwarderSockets: List<ServerSocket> = emptyList()
+    val activeForwarderSockets: List<ServerSocket> = emptyList(),
+    val groupBrowserUrl: String? = null
 )
 
 enum class ConnectionStatus {
