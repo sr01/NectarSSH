@@ -66,6 +66,11 @@
             android:label="Port Forward Group"
             android:theme="@style/Theme.NectarSSH" />
         <activity
+            android:name="com.rosi.nectarssh.ImportSshConfigActivity"
+            android:exported="false"
+            android:label="Import SSH Config"
+            android:theme="@style/Theme.NectarSSH" />
+        <activity
             android:name="com.rosi.nectarssh.ui.connection.ConnectionLogActivity"
             android:exported="false"
             android:label="Connection Logs"
