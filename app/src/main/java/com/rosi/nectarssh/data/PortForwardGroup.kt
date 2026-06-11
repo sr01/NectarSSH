@@ -7,5 +7,6 @@ data class PortForwardGroup(
     val id: String,
     val connectionId: String,
     val nickname: String,
-    val portForwardIds: List<String>
+    val portForwardIds: List<String>,
+    val browserUrl: String? = null
 )
