@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -132,6 +133,17 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
         }
     }
 
+    val importSshConfigLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            portForwardsRefresh++
+            connectionsRefresh++
+            identitiesRefresh++
+            groupsRefresh++
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -149,6 +161,12 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                         }) {
                             Icon(Icons.Default.PlaylistAdd, contentDescription = "Batch Add")
                         }
+                    }
+                    IconButton(onClick = {
+                        val intent = Intent(context, ImportSshConfigActivity::class.java)
+                        importSshConfigLauncher.launch(intent)
+                    }) {
+                        Icon(Icons.Default.FileUpload, contentDescription = "Import SSH Config")
                     }
                 }
             )

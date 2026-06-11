@@ -91,7 +91,13 @@ fun ConnectionLogScreen(
 
             if (newState.status == ConnectionStatus.CONNECTED && previousStatus != ConnectionStatus.CONNECTED && !browserOpened) {
                 browserOpened = true
-                newState.portForwards.forEach { pf ->
+                newState.groupBrowserUrl?.takeIf { it.isNotBlank() }?.let { url ->
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Failed to open browser: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                } ?: newState.portForwards.forEach { pf ->
                     pf.browserUrl?.takeIf { it.isNotBlank() }?.let { urlTemplate ->
                         val resolvedUrl = urlTemplate.replace("{localPort}", pf.localPort.toString())
                         try {
