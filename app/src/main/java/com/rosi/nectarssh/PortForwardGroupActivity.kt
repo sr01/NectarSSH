@@ -83,6 +83,7 @@ fun PortForwardGroupScreen(
     }
     var expandedConnectionDropdown by remember { mutableStateOf(false) }
     var nickname by remember { mutableStateOf(existingGroup?.nickname ?: "") }
+    var browserUrl by remember { mutableStateOf(existingGroup?.browserUrl ?: "") }
     var selectedPortForwardIds by remember {
         mutableStateOf(existingGroup?.portForwardIds?.toSet() ?: emptySet())
     }
@@ -116,7 +117,8 @@ fun PortForwardGroupScreen(
                                     id = existingGroup?.id ?: UUID.randomUUID().toString(),
                                     connectionId = selectedConnectionId,
                                     nickname = nickname,
-                                    portForwardIds = selectedPortForwardIds.toList()
+                                    portForwardIds = selectedPortForwardIds.toList(),
+                                    browserUrl = browserUrl.ifBlank { null }
                                 )
                                 onSave(group)
                             }
@@ -141,6 +143,16 @@ fun PortForwardGroupScreen(
                 value = nickname,
                 onValueChange = { nickname = it },
                 label = { Text("Group Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = browserUrl,
+                onValueChange = { browserUrl = it },
+                label = { Text("Browser URL (Optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
