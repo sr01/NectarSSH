@@ -77,6 +77,13 @@
             android:theme="@style/Theme.NectarSSH"
             android:launchMode="singleTop" />
         <activity
+            android:name="com.rosi.nectarssh.ShortcutLaunchActivity"
+            android:exported="true"
+            android:label="Quick Connect"
+            android:theme="@style/Theme.NectarSSH"
+            android:excludeFromRecents="true"
+            android:taskAffinity="" />
+        <activity
             android:name="com.rosi.nectarssh.ImportActivity"
             android:exported="true"
             android:label="Import Configuration"
