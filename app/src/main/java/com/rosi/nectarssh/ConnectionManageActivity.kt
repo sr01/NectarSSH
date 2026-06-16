@@ -3,6 +3,7 @@ package com.rosi.nectarssh
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -21,15 +22,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddToHomeScreen
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -38,12 +42,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rosi.nectarssh.data.Connection
 import com.rosi.nectarssh.data.ConnectionStorage
@@ -66,6 +73,7 @@ import com.rosi.nectarssh.data.RecentStorage
 import com.rosi.nectarssh.data.RecentType
 import com.rosi.nectarssh.service.SSHTunnelService
 import com.rosi.nectarssh.ui.theme.NectarSSHTheme
+import com.rosi.nectarssh.util.ShortcutHelper
 import java.util.UUID
 
 class ConnectionManageActivity : ComponentActivity() {
@@ -92,6 +100,11 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
     var identitiesRefresh by remember { mutableStateOf(0) }
 
     val recentStorage = remember { RecentStorage(context) }
+
+    var showShortcutSheet by remember { mutableStateOf(false) }
+    var shortcutLabel by remember { mutableStateOf("") }
+    var shortcutItemId by remember { mutableStateOf("") }
+    var shortcutType by remember { mutableStateOf("") }
 
     val groupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -241,6 +254,12 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                     },
                     onGroupDelete = {
                         groupsRefresh++
+                    },
+                    onGroupShortcut = { group ->
+                        shortcutLabel = group.nickname
+                        shortcutItemId = group.id
+                        shortcutType = ShortcutLaunchActivity.TYPE_PORT_FORWARD_GROUP
+                        showShortcutSheet = true
                     }
                 )
                 1 -> PortForwardsTab(
@@ -269,6 +288,12 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                     },
                     onPortForwardDelete = {
                         portForwardsRefresh++
+                    },
+                    onPortForwardShortcut = { portForward ->
+                        shortcutLabel = portForward.nickname
+                        shortcutItemId = portForward.id
+                        shortcutType = ShortcutLaunchActivity.TYPE_PORT_FORWARD
+                        showShortcutSheet = true
                     }
                 )
                 2 -> ConnectionsTab(
@@ -296,6 +321,12 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                     },
                     onConnectionDelete = {
                         connectionsRefresh++
+                    },
+                    onConnectionShortcut = { connection ->
+                        shortcutLabel = connection.nickname
+                        shortcutItemId = connection.id
+                        shortcutType = ShortcutLaunchActivity.TYPE_CONNECTION
+                        showShortcutSheet = true
                     }
                 )
                 3 -> IdentitiesTab(
@@ -310,6 +341,73 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
             }
         }
     }
+
+    if (showShortcutSheet) {
+        AddToHomeScreenSheet(
+            label = shortcutLabel,
+            onAdd = {
+                val success = ShortcutHelper.requestPinShortcut(
+                    context = context,
+                    itemId = shortcutItemId,
+                    shortcutType = shortcutType,
+                    label = shortcutLabel
+                )
+                if (!success) {
+                    Toast.makeText(context, "Home screen shortcuts not supported", Toast.LENGTH_SHORT).show()
+                }
+                showShortcutSheet = false
+            },
+            onDismiss = { showShortcutSheet = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddToHomeScreenSheet(
+    label: String,
+    onAdd: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AddToHomeScreen,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Add to Home Screen",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "Add \"$label\" as a shortcut on your home screen for quick access.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = onAdd,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Add Shortcut")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -318,7 +416,8 @@ fun GroupsTab(
     refreshTrigger: Int,
     onGroupConnect: (PortForwardGroup) -> Unit,
     onGroupEdit: (PortForwardGroup) -> Unit,
-    onGroupDelete: () -> Unit
+    onGroupDelete: () -> Unit,
+    onGroupShortcut: (PortForwardGroup) -> Unit
 ) {
     val context = LocalContext.current
     val groupStorage = remember { PortForwardGroupStorage(context) }
@@ -352,7 +451,8 @@ fun GroupsTab(
                     onDelete = {
                         groupToDelete = group
                         showDeleteDialog = true
-                    }
+                    },
+                    onAddShortcut = { onGroupShortcut(group) }
                 )
             }
         }
@@ -397,7 +497,8 @@ fun GroupListItem(
     portForwardCount: Int,
     onClick: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onAddShortcut: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -438,6 +539,13 @@ fun GroupListItem(
                     }
                 )
                 DropdownMenuItem(
+                    text = { Text("Add to Home Screen") },
+                    onClick = {
+                        showMenu = false
+                        onAddShortcut()
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("Delete") },
                     onClick = {
                         showMenu = false
@@ -454,7 +562,8 @@ fun PortForwardsTab(
     refreshTrigger: Int,
     onPortForwardConnect: (PortForward, Connection) -> Unit,
     onPortForwardEdit: (PortForward) -> Unit,
-    onPortForwardDelete: () -> Unit
+    onPortForwardDelete: () -> Unit,
+    onPortForwardShortcut: (PortForward) -> Unit
 ) {
     val context = LocalContext.current
     val portForwardStorage = remember { PortForwardStorage(context) }
@@ -508,7 +617,8 @@ fun PortForwardsTab(
                         onDelete = {
                             portForwardToDelete = portForward
                             showDeleteDialog = true
-                        }
+                        },
+                        onAddShortcut = { onPortForwardShortcut(portForward) }
                     )
                 }
             }
@@ -553,7 +663,8 @@ fun PortForwardListItem(
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onAddShortcut: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -601,6 +712,13 @@ fun PortForwardListItem(
                     }
                 )
                 DropdownMenuItem(
+                    text = { Text("Add to Home Screen") },
+                    onClick = {
+                        showMenu = false
+                        onAddShortcut()
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("Delete") },
                     onClick = {
                         showMenu = false
@@ -617,7 +735,8 @@ fun ConnectionsTab(
     refreshTrigger: Int,
     onConnectionClick: (Connection) -> Unit,
     onConnectionEdit: (Connection) -> Unit,
-    onConnectionDelete: () -> Unit
+    onConnectionDelete: () -> Unit,
+    onConnectionShortcut: (Connection) -> Unit
 ) {
     val context = LocalContext.current
     val connectionStorage = remember { ConnectionStorage(context) }
@@ -655,7 +774,8 @@ fun ConnectionsTab(
                     onDelete = {
                         connectionToDelete = connection
                         showDeleteDialog = true
-                    }
+                    },
+                    onAddShortcut = { onConnectionShortcut(connection) }
                 )
             }
         }
@@ -687,7 +807,8 @@ fun ConnectionListItem(
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onAddShortcut: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -732,6 +853,13 @@ fun ConnectionListItem(
                     onClick = {
                         showMenu = false
                         onDuplicate()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Add to Home Screen") },
+                    onClick = {
+                        showMenu = false
+                        onAddShortcut()
                     }
                 )
                 DropdownMenuItem(
