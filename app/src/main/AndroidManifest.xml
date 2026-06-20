@@ -75,7 +75,9 @@
             android:exported="false"
             android:label="Connection Logs"
             android:theme="@style/Theme.NectarSSH"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden" />
         <activity
             android:name="com.rosi.nectarssh.ShortcutLaunchActivity"
             android:exported="true"
