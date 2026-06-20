@@ -1,33 +1,41 @@
-![ic_launcher_round.webp](app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp) 
+![ic_launcher_round.webp](app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp)
 # NectarSSH
 
-A sleek Android SSH tunnel manager built with Kotlin and Jetpack Compose.
+Your server in your pocket. SSH tunnels, port forwards, and a full interactive terminal — all from your phone.
 
 ![](doc/screenshots/screen_main.png) ![screen_manage.png](doc/screenshots/screen_manage.png)
 
-## Features
+## What can it do?
 
-- **Port Forwarding** – Create local, remote, and dynamic port forwards
-- **Connection Management** – Store and manage multiple SSH connections
-- **Identity Support** – Password and key-based authentication (RSA, Ed25519)
-- **Persistent Tunnels** – Foreground service keeps connections alive
-- **Real-time Logs** – Monitor connection status and traffic
+| Feature | |
+|---------|--|
+| **Interactive Terminal** | Full shell with colors, cursor, scrollback. Run vim, htop, whatever. |
+| **Port Forwarding** | Local forwards, grouped or standalone. Reach anything behind your server. |
+| **Home Screen Shortcuts** | One tap to connect. Pick from 100+ icons or use your own image. |
+| **Persistent Tunnels** | Runs as a foreground service. Survives screen off, app switches, everything. |
+| **Multiple Identities** | Passwords, RSA keys, Ed25519. One device, many servers. |
+| **Connection Groups** | Bundle port forwards together. Connect once, forward everything. |
 
-## Tech Stack
+## Install
 
-- Kotlin + Jetpack Compose + Material3
-- SSHJ for SSH operations
-- BouncyCastle for cryptography
-- Coroutines + Flow for async operations
+Grab the latest APK from [Releases](https://github.com/sr01/NectarSSH/releases/latest) and sideload it.
 
-## Build
+## Build from source
 
 ```bash
 ./gradlew assembleDebug
-./gradlew installDebug
+adb install app/build/outputs/apk/debug/*.apk
 ```
 
-**Min SDK:** 24 | **Target SDK:** 36
+**Requires:** Android 7.0+ (API 24)
+
+## Under the hood
+
+- Kotlin + Jetpack Compose + Material3
+- [SSHJ](https://github.com/hierynomus/sshj) for SSH
+- [Termux terminal libraries](https://github.com/termux/termux-app) for terminal emulation (Apache 2.0)
+- BouncyCastle for cryptography
+- Coroutines + Flow for async I/O
 
 ## License
 
