@@ -14,7 +14,8 @@ object ShortcutHelper {
         context: Context,
         itemId: String,
         shortcutType: String,
-        label: String
+        label: String,
+        icon: IconCompat? = null
     ): Boolean {
         if (!ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
             return false
@@ -26,10 +27,11 @@ object ShortcutHelper {
             putExtra(ShortcutLaunchActivity.EXTRA_ITEM_ID, itemId)
         }
 
-        val shortcutInfo = ShortcutInfoCompat.Builder(context, "nectar_${shortcutType}_$itemId")
+        val uniqueId = "nectar_${shortcutType}_${itemId}_${System.currentTimeMillis()}"
+        val shortcutInfo = ShortcutInfoCompat.Builder(context, uniqueId)
             .setShortLabel(label)
             .setLongLabel(label)
-            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
+            .setIcon(icon ?: IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(shortcutIntent)
             .build()
 

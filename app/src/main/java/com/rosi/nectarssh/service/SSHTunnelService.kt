@@ -191,6 +191,7 @@ class SSHTunnelService : Service() {
                 Log.e(TAG, "Failed to start session", e)
                 logToSession(sessionId, LogLevel.ERROR, "Startup failed: ${e.message}")
                 updateSessionState(sessionId) { it.copy(status = ConnectionStatus.ERROR) }
+                scheduleErrorCleanup(sessionId)
             }
         }
     }
@@ -234,6 +235,16 @@ class SSHTunnelService : Service() {
     fun stopSession(sessionId: String) {
         serviceScope.launch {
             activeSessions[sessionId]?.let { disconnectSSH(it) }
+        }
+    }
+
+    private fun scheduleErrorCleanup(sessionId: String) {
+        serviceScope.launch {
+            delay(30_000L)
+            val session = activeSessions[sessionId]
+            if (session != null && session.status == ConnectionStatus.ERROR) {
+                disconnectSSH(session)
+            }
         }
     }
 
@@ -334,6 +345,7 @@ class SSHTunnelService : Service() {
                 activeSessions[sessionId]?.let { disconnectSSH(it) }
             } else {
                 updateSessionState(sessionId) { it.copy(status = ConnectionStatus.ERROR) }
+                scheduleErrorCleanup(sessionId)
             }
         }
     }

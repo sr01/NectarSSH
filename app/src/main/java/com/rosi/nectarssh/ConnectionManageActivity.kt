@@ -2,6 +2,7 @@ package com.rosi.nectarssh
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,6 +11,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,12 +29,119 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToHomeScreen
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Lan
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Anchor
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Api
+import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Battery5Bar
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Cable
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Cast
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudQueue
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.DataObject
+import androidx.compose.material.icons.filled.DeviceHub
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Domain
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.EmojiNature
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FilterVintage
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Gamepad
+import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Laptop
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Mouse
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Park
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.Sailing
+import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.SdCard
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Skateboarding
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.Speaker
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Sports
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.Token
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Umbrella
+import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Webhook
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -43,6 +153,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -53,14 +164,20 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.IconCompat
 import com.rosi.nectarssh.data.Connection
 import com.rosi.nectarssh.data.ConnectionStorage
 import com.rosi.nectarssh.data.Identity
@@ -74,6 +191,7 @@ import com.rosi.nectarssh.data.RecentType
 import com.rosi.nectarssh.service.SSHTunnelService
 import com.rosi.nectarssh.ui.theme.NectarSSHTheme
 import com.rosi.nectarssh.util.ShortcutHelper
+import com.rosi.nectarssh.util.ShortcutIconStorage
 import java.util.UUID
 
 class ConnectionManageActivity : ComponentActivity() {
@@ -102,9 +220,12 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
     val recentStorage = remember { RecentStorage(context) }
 
     var showShortcutSheet by remember { mutableStateOf(false) }
+    var shortcutSheetKey by remember { mutableStateOf(0) }
     var shortcutLabel by remember { mutableStateOf("") }
     var shortcutItemId by remember { mutableStateOf("") }
     var shortcutType by remember { mutableStateOf("") }
+    var shortcutSelectedIconIndex by remember { mutableStateOf<Int?>(null) }
+    var shortcutCustomBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val groupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -259,6 +380,9 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                         shortcutLabel = group.nickname
                         shortcutItemId = group.id
                         shortcutType = ShortcutLaunchActivity.TYPE_PORT_FORWARD_GROUP
+                        shortcutSelectedIconIndex = null
+                        shortcutCustomBitmap = null
+                        shortcutSheetKey++
                         showShortcutSheet = true
                     }
                 )
@@ -293,6 +417,9 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                         shortcutLabel = portForward.nickname
                         shortcutItemId = portForward.id
                         shortcutType = ShortcutLaunchActivity.TYPE_PORT_FORWARD
+                        shortcutSelectedIconIndex = null
+                        shortcutCustomBitmap = null
+                        shortcutSheetKey++
                         showShortcutSheet = true
                     }
                 )
@@ -326,6 +453,9 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
                         shortcutLabel = connection.nickname
                         shortcutItemId = connection.id
                         shortcutType = ShortcutLaunchActivity.TYPE_CONNECTION
+                        shortcutSelectedIconIndex = null
+                        shortcutCustomBitmap = null
+                        shortcutSheetKey++
                         showShortcutSheet = true
                     }
                 )
@@ -343,33 +473,169 @@ fun ConnectionManageScreen(onBack: () -> Unit) {
     }
 
     if (showShortcutSheet) {
-        AddToHomeScreenSheet(
-            label = shortcutLabel,
-            onAdd = {
-                val success = ShortcutHelper.requestPinShortcut(
-                    context = context,
-                    itemId = shortcutItemId,
-                    shortcutType = shortcutType,
-                    label = shortcutLabel
-                )
-                if (!success) {
-                    Toast.makeText(context, "Home screen shortcuts not supported", Toast.LENGTH_SHORT).show()
-                }
-                showShortcutSheet = false
-            },
-            onDismiss = { showShortcutSheet = false }
-        )
+        key(shortcutSheetKey) {
+            AddToHomeScreenSheet(
+                label = shortcutLabel,
+                selectedIconIndex = shortcutSelectedIconIndex,
+                customBitmap = shortcutCustomBitmap,
+                onSelectedIconChanged = { shortcutSelectedIconIndex = it },
+                onCustomBitmapChanged = { shortcutCustomBitmap = it },
+                onAdd = { icon ->
+                    val success = ShortcutHelper.requestPinShortcut(
+                        context = context,
+                        itemId = shortcutItemId,
+                        shortcutType = shortcutType,
+                        label = shortcutLabel,
+                        icon = icon
+                    )
+                    if (!success) {
+                        Toast.makeText(context, "Home screen shortcuts not supported", Toast.LENGTH_SHORT).show()
+                    }
+                    showShortcutSheet = false
+                },
+                onDismiss = { showShortcutSheet = false }
+            )
+        }
     }
 }
+
+data class ShortcutIcon(
+    val imageVector: ImageVector,
+    val label: String
+)
+
+private val SHORTCUT_ICONS = listOf(
+    ShortcutIcon(Icons.Default.Terminal, "Terminal"),
+    ShortcutIcon(Icons.Default.Cloud, "Cloud"),
+    ShortcutIcon(Icons.Default.Dns, "Server"),
+    ShortcutIcon(Icons.Default.Storage, "Database"),
+    ShortcutIcon(Icons.Default.Router, "Router"),
+    ShortcutIcon(Icons.Default.Lan, "Network"),
+    ShortcutIcon(Icons.Default.Hub, "Hub"),
+    ShortcutIcon(Icons.Default.VpnKey, "VPN Key"),
+    ShortcutIcon(Icons.Default.Lock, "Lock"),
+    ShortcutIcon(Icons.Default.Key, "Key"),
+    ShortcutIcon(Icons.Default.Security, "Security"),
+    ShortcutIcon(Icons.Default.Computer, "Computer"),
+    ShortcutIcon(Icons.Default.Code, "Code"),
+    ShortcutIcon(Icons.Default.Link, "Link"),
+    ShortcutIcon(Icons.Default.Folder, "Folder"),
+    ShortcutIcon(Icons.Default.Settings, "Settings"),
+    ShortcutIcon(Icons.Default.Home, "Home"),
+    ShortcutIcon(Icons.Default.Work, "Work"),
+    ShortcutIcon(Icons.Default.Wifi, "WiFi"),
+    ShortcutIcon(Icons.Default.Public, "Globe"),
+    ShortcutIcon(Icons.Default.Shield, "Shield"),
+    ShortcutIcon(Icons.Default.Cable, "Cable"),
+    ShortcutIcon(Icons.Default.Speed, "Speed"),
+    ShortcutIcon(Icons.Default.DeviceHub, "Device Hub"),
+    ShortcutIcon(Icons.Default.Api, "API"),
+    ShortcutIcon(Icons.Default.Bluetooth, "Bluetooth"),
+    ShortcutIcon(Icons.Default.Cast, "Cast"),
+    ShortcutIcon(Icons.Default.Domain, "Domain"),
+    ShortcutIcon(Icons.Default.Star, "Star"),
+    ShortcutIcon(Icons.Default.Person, "Person"),
+    ShortcutIcon(Icons.Default.Dashboard, "Dashboard"),
+    ShortcutIcon(Icons.Default.Gamepad, "Gamepad"),
+    ShortcutIcon(Icons.Default.Language, "Language"),
+    ShortcutIcon(Icons.Default.Science, "Science"),
+    ShortcutIcon(Icons.Default.Build, "Build"),
+    ShortcutIcon(Icons.Default.Memory, "Memory"),
+    ShortcutIcon(Icons.Default.Phone, "Phone"),
+    ShortcutIcon(Icons.Default.Laptop, "Laptop"),
+    ShortcutIcon(Icons.Default.CloudQueue, "Cloud Queue"),
+    ShortcutIcon(Icons.Default.CloudDone, "Cloud Done"),
+    ShortcutIcon(Icons.Default.Backup, "Backup"),
+    ShortcutIcon(Icons.Default.DataObject, "Data"),
+    ShortcutIcon(Icons.Default.Token, "Token"),
+    ShortcutIcon(Icons.Default.AdminPanelSettings, "Admin"),
+    ShortcutIcon(Icons.Default.Policy, "Policy"),
+    ShortcutIcon(Icons.Default.Inventory2, "Inventory"),
+    ShortcutIcon(Icons.Default.Layers, "Layers"),
+    ShortcutIcon(Icons.Default.Webhook, "Webhook"),
+    ShortcutIcon(Icons.Default.Usb, "USB"),
+    ShortcutIcon(Icons.Default.SdCard, "SD Card"),
+    ShortcutIcon(Icons.Default.Power, "Power"),
+    ShortcutIcon(Icons.Default.Battery5Bar, "Battery"),
+    ShortcutIcon(Icons.Default.Watch, "Watch"),
+    ShortcutIcon(Icons.Default.Headset, "Headset"),
+    ShortcutIcon(Icons.Default.Speaker, "Speaker"),
+    ShortcutIcon(Icons.Default.Tv, "TV"),
+    ShortcutIcon(Icons.Default.Mouse, "Mouse"),
+    ShortcutIcon(Icons.Default.Keyboard, "Keyboard"),
+    ShortcutIcon(Icons.Default.RocketLaunch, "Rocket"),
+    ShortcutIcon(Icons.Default.Bolt, "Bolt"),
+    ShortcutIcon(Icons.Default.Palette, "Palette"),
+    ShortcutIcon(Icons.Default.Favorite, "Heart"),
+    ShortcutIcon(Icons.Default.MusicNote, "Music"),
+    ShortcutIcon(Icons.Default.Pets, "Pets"),
+    ShortcutIcon(Icons.Default.EmojiNature, "Nature"),
+    ShortcutIcon(Icons.Default.Face, "Face"),
+    ShortcutIcon(Icons.Default.Celebration, "Party"),
+    ShortcutIcon(Icons.Default.LocalFireDepartment, "Fire"),
+    ShortcutIcon(Icons.Default.CameraAlt, "Camera"),
+    ShortcutIcon(Icons.Default.PhotoCamera, "Photo"),
+    ShortcutIcon(Icons.Default.Videocam, "Video"),
+    ShortcutIcon(Icons.Default.Visibility, "Eye"),
+    ShortcutIcon(Icons.Default.Notifications, "Bell"),
+    ShortcutIcon(Icons.Default.Map, "Map"),
+    ShortcutIcon(Icons.Default.Explore, "Compass"),
+    ShortcutIcon(Icons.Default.Flag, "Flag"),
+    ShortcutIcon(Icons.Default.Anchor, "Anchor"),
+    ShortcutIcon(Icons.Default.Flight, "Plane"),
+    ShortcutIcon(Icons.Default.DirectionsCar, "Car"),
+    ShortcutIcon(Icons.Default.Sailing, "Sailing"),
+    ShortcutIcon(Icons.Default.Skateboarding, "Skate"),
+    ShortcutIcon(Icons.Default.Sports, "Sports"),
+    ShortcutIcon(Icons.Default.SportsEsports, "Gaming"),
+    ShortcutIcon(Icons.Default.Restaurant, "Food"),
+    ShortcutIcon(Icons.Default.SmartToy, "Robot"),
+    ShortcutIcon(Icons.Default.BugReport, "Bug"),
+    ShortcutIcon(Icons.Default.Extension, "Puzzle"),
+    ShortcutIcon(Icons.Default.AutoAwesome, "Sparkle"),
+    ShortcutIcon(Icons.Default.FlashOn, "Flash"),
+    ShortcutIcon(Icons.Default.ElectricBolt, "Electric"),
+    ShortcutIcon(Icons.Default.LightMode, "Sun"),
+    ShortcutIcon(Icons.Default.Nightlight, "Moon"),
+    ShortcutIcon(Icons.Default.Brightness7, "Bright"),
+    ShortcutIcon(Icons.Default.WaterDrop, "Water"),
+    ShortcutIcon(Icons.Default.Eco, "Leaf"),
+    ShortcutIcon(Icons.Default.Park, "Tree"),
+    ShortcutIcon(Icons.Default.FilterVintage, "Flower"),
+    ShortcutIcon(Icons.Default.Thermostat, "Temp"),
+    ShortcutIcon(Icons.Default.Umbrella, "Umbrella"),
+    ShortcutIcon(Icons.Default.Book, "Book"),
+    ShortcutIcon(Icons.Default.Storefront, "Store"),
+    ShortcutIcon(Icons.Default.AccountBalance, "Bank"),
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddToHomeScreenSheet(
     label: String,
-    onAdd: () -> Unit,
+    selectedIconIndex: Int?,
+    customBitmap: Bitmap?,
+    onSelectedIconChanged: (Int?) -> Unit,
+    onCustomBitmapChanged: (Bitmap?) -> Unit,
+    onAdd: (IconCompat?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            val bitmap = ShortcutIconStorage.saveIconFromUri(context, uri)
+            if (bitmap != null) {
+                onCustomBitmapChanged(bitmap)
+                onSelectedIconChanged(null)
+            } else {
+                Toast.makeText(context, "Failed to load image", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -382,30 +648,197 @@ fun AddToHomeScreenSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.AddToHomeScreen,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
             Text(
                 text = "Add to Home Screen",
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = "Add \"$label\" as a shortcut on your home screen for quick access.",
+                text = "Choose an icon for \"$label\"",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(6),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(SHORTCUT_ICONS.size) { index ->
+                    val icon = SHORTCUT_ICONS[index]
+                    val isSelected = selectedIconIndex == index && customBitmap == null
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .then(
+                                if (isSelected) Modifier.border(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.primary,
+                                    CircleShape
+                                ) else Modifier
+                            )
+                            .clickable {
+                                onSelectedIconChanged(index)
+                                onCustomBitmapChanged(null)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon.imageVector,
+                            contentDescription = icon.label,
+                            modifier = Modifier.size(28.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = { imagePickerLauncher.launch("image/*") }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Choose from Gallery")
+                }
+                if (customBitmap != null) {
+                    Image(
+                        bitmap = customBitmap!!.asImageBitmap(),
+                        contentDescription = "Selected icon",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             Button(
-                onClick = onAdd,
+                onClick = {
+                    val icon = when {
+                        customBitmap != null -> IconCompat.createWithAdaptiveBitmap(customBitmap!!)
+                        selectedIconIndex != null -> {
+                            val vector = SHORTCUT_ICONS[selectedIconIndex!!].imageVector
+                            val bitmap = imageVectorToBitmap(vector)
+                            IconCompat.createWithAdaptiveBitmap(bitmap)
+                        }
+                        else -> null
+                    }
+                    onAdd(icon)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Add Shortcut")
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+private fun imageVectorToBitmap(imageVector: ImageVector): Bitmap {
+    val size = 192
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+
+    val bgPaint = android.graphics.Paint().apply {
+        color = android.graphics.Color.parseColor("#1B6EF3")
+        isAntiAlias = true
+    }
+    canvas.drawCircle(size / 2f, size / 2f, size / 2f, bgPaint)
+
+    val iconPadding = size * 0.25f
+    val iconSize = size - (iconPadding * 2)
+
+    canvas.save()
+    canvas.translate(iconPadding, iconPadding)
+    val scale = iconSize / imageVector.defaultWidth.value
+    canvas.scale(scale, scale)
+
+    val pathPaint = android.graphics.Paint().apply {
+        color = android.graphics.Color.WHITE
+        isAntiAlias = true
+        style = android.graphics.Paint.Style.FILL
+    }
+
+    fun renderGroup(group: androidx.compose.ui.graphics.vector.VectorGroup) {
+        for (i in 0 until group.size) {
+            when (val node = group[i]) {
+                is androidx.compose.ui.graphics.vector.VectorPath -> {
+                    val composePath = androidx.compose.ui.graphics.Path()
+                    androidx.compose.ui.graphics.vector.PathParser()
+                        .parsePathString(node.pathData.toPathString())
+                        .toPath(composePath)
+                    val androidPath = composePath.asAndroidPath()
+                    canvas.drawPath(androidPath, pathPaint)
+                }
+                is androidx.compose.ui.graphics.vector.VectorGroup -> {
+                    renderGroup(node)
+                }
+            }
+        }
+    }
+
+    renderGroup(imageVector.root)
+    canvas.restore()
+    return bitmap
+}
+
+private fun List<androidx.compose.ui.graphics.vector.PathNode>.toPathString(): String {
+    return buildString {
+        for (node in this@toPathString) {
+            when (node) {
+                is androidx.compose.ui.graphics.vector.PathNode.MoveTo ->
+                    append("M${node.x},${node.y}")
+                is androidx.compose.ui.graphics.vector.PathNode.LineTo ->
+                    append("L${node.x},${node.y}")
+                is androidx.compose.ui.graphics.vector.PathNode.CurveTo ->
+                    append("C${node.x1},${node.y1} ${node.x2},${node.y2} ${node.x3},${node.y3}")
+                is androidx.compose.ui.graphics.vector.PathNode.QuadTo ->
+                    append("Q${node.x1},${node.y1} ${node.x2},${node.y2}")
+                is androidx.compose.ui.graphics.vector.PathNode.Close ->
+                    append("Z")
+                is androidx.compose.ui.graphics.vector.PathNode.HorizontalTo ->
+                    append("H${node.x}")
+                is androidx.compose.ui.graphics.vector.PathNode.VerticalTo ->
+                    append("V${node.y}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeMoveTo ->
+                    append("m${node.dx},${node.dy}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeLineTo ->
+                    append("l${node.dx},${node.dy}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeCurveTo ->
+                    append("c${node.dx1},${node.dy1} ${node.dx2},${node.dy2} ${node.dx3},${node.dy3}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeQuadTo ->
+                    append("q${node.dx1},${node.dy1} ${node.dx2},${node.dy2}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeHorizontalTo ->
+                    append("h${node.dx}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeVerticalTo ->
+                    append("v${node.dy}")
+                is androidx.compose.ui.graphics.vector.PathNode.ArcTo ->
+                    append("A${node.horizontalEllipseRadius},${node.verticalEllipseRadius} ${node.theta} ${if (node.isMoreThanHalf) 1 else 0},${if (node.isPositiveArc) 1 else 0} ${node.arcStartX},${node.arcStartY}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeArcTo ->
+                    append("a${node.horizontalEllipseRadius},${node.verticalEllipseRadius} ${node.theta} ${if (node.isMoreThanHalf) 1 else 0},${if (node.isPositiveArc) 1 else 0} ${node.arcStartDx},${node.arcStartDy}")
+                is androidx.compose.ui.graphics.vector.PathNode.ReflectiveCurveTo ->
+                    append("S${node.x1},${node.y1} ${node.x2},${node.y2}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeReflectiveCurveTo ->
+                    append("s${node.dx1},${node.dy1} ${node.dx2},${node.dy2}")
+                is androidx.compose.ui.graphics.vector.PathNode.ReflectiveQuadTo ->
+                    append("T${node.x},${node.y}")
+                is androidx.compose.ui.graphics.vector.PathNode.RelativeReflectiveQuadTo ->
+                    append("t${node.dx},${node.dy}")
+            }
         }
     }
 }

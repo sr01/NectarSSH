@@ -83,6 +83,9 @@ class ConnectionLogActivity : ComponentActivity() {
         if (sessionState?.status == ConnectionStatus.CONNECTED || sessionState?.status == ConnectionStatus.CONNECTING) {
             // Will be handled by ConnectionLogScreen's dialog
         } else {
+            if (sessionState?.status == ConnectionStatus.ERROR) {
+                tunnelService?.stopSession(sessionId!!)
+            }
             finish()
         }
     }
