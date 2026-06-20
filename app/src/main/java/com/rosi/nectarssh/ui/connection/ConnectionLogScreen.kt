@@ -47,7 +47,9 @@ fun ConnectionLogScreen(
     onPassphraseResponse: (PassphraseResponse) -> Unit,
     onDisconnect: () -> Unit,
     onKeepRunning: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onConnected: (() -> Unit)? = null,
+    serviceReady: Boolean = true
 ) {
     val context = LocalContext.current
     var sessionState by remember { mutableStateOf<SessionState?>(null) }
@@ -59,7 +61,9 @@ fun ConnectionLogScreen(
     var currentPassphraseRequest by remember { mutableStateOf<PassphraseRequest?>(null) }
 
     // Initial load with timeout
-    LaunchedEffect(sessionId) {
+    LaunchedEffect(sessionId, serviceReady) {
+        if (!serviceReady) return@LaunchedEffect
+        loadingFailed = false
         var attempts = 0
         while (attempts < 20 && sessionState == null && !loadingFailed) {
             val initialState = getSessionState()
@@ -81,7 +85,8 @@ fun ConnectionLogScreen(
     }
 
     // Collect session state updates via Flow
-    LaunchedEffect(sessionId) {
+    LaunchedEffect(sessionId, serviceReady) {
+        if (!serviceReady) return@LaunchedEffect
         val stateFlow = getSessionStateFlow()
         stateFlow?.collect { newState ->
             loadingFailed = false // Reset failed state if we get updates
@@ -107,10 +112,12 @@ fun ConnectionLogScreen(
                         }
                     }
                 }
+                onConnected?.invoke()
             }
 
             // Auto-finish activity if disconnected from external source (like notification)
             if (newState.status == ConnectionStatus.DISCONNECTED) {
+                android.util.Log.d("NectarTerminal", "Auto-finish: status DISCONNECTED")
                 onBack()
             }
 

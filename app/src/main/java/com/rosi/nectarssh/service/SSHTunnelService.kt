@@ -151,13 +151,14 @@ class SSHTunnelService : Service() {
                     portForwardId != null -> {
                         listOfNotNull(portForwardStorage.getPortForward(portForwardId))
                     }
-                    else -> {
-                        portForwardStorage.getPortForwardsForConnection(connectionId)
-                            .filter { it.enabled }
-                    }
+                    else -> emptyList()
                 }
 
-                val nickname = portForwards.firstOrNull()?.nickname ?: connection.nickname
+                val nickname = when {
+                    groupId != null -> portForwards.firstOrNull()?.nickname ?: connection.nickname
+                    portForwardId != null -> portForwards.firstOrNull()?.nickname ?: connection.nickname
+                    else -> connection.nickname
+                }
                 val notificationId = notificationIdCounter.getAndIncrement()
                 val sequenceNumber = sessionSequenceCounter.getAndIncrement()
                 
@@ -313,15 +314,12 @@ class SSHTunnelService : Service() {
             logToSession(sessionId, LogLevel.INFO, "Authentication successful")
 
             val session = ssh.startSession()
-            session.allocatePTY("vt100", 120, 40, 0, 0, emptyMap())
+            session.allocatePTY("xterm-256color", 50, 30, 0, 0, emptyMap())
             
             updateSessionState(sessionId) { 
                 it.copy(sshClient = ssh, session = session)
             }
 
-            // Start capturing remote output before starting shell
-            startCapturingOutput(sessionId, session)
-            
             session.startShell()
 
             val currentPf = activeSessions[sessionId]?.portForwards ?: emptyList()
@@ -451,6 +449,25 @@ class SSHTunnelService : Service() {
     fun getLogFlow(sessionId: String): SharedFlow<LogEntry>? = logFlows[sessionId]
     fun getSessionStateFlow(sessionId: String): SharedFlow<SessionState>? = sessionStateFlows[sessionId]?.asSharedFlow()
     fun getPassphraseRequestFlow(): SharedFlow<PassphraseRequest> = passphraseRequestFlow
+
+    fun getSessionInputStream(sessionId: String): java.io.InputStream? =
+        activeSessions[sessionId]?.session?.inputStream
+
+    fun getSessionOutputStream(sessionId: String): java.io.OutputStream? =
+        activeSessions[sessionId]?.session?.outputStream
+
+    fun resizeTerminal(sessionId: String, cols: Int, rows: Int) {
+        serviceScope.launch(Dispatchers.IO) {
+            val session = activeSessions[sessionId]?.session
+            if (session is net.schmizz.sshj.connection.channel.direct.SessionChannel) {
+                try {
+                    session.changeWindowDimensions(cols, rows, 0, 0)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to resize terminal", e)
+                }
+            }
+        }
+    }
     fun providePassphrase(response: PassphraseResponse) { passphraseResponses[response.sessionId]?.complete(response) }
 
     private fun logToSession(sessionId: String, level: LogLevel, message: String) {

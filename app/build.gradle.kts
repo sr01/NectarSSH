@@ -75,6 +75,10 @@ dependencies {
     // Icons
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Terminal emulator
+    implementation(project(":terminal-emulator"))
+    implementation(project(":terminal-view"))
+
     // SSH library
     implementation("com.hierynomus:sshj:0.39.0")
     implementation("org.slf4j:slf4j-api:2.0.9")

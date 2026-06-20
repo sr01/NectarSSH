@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "NectarSSH"
 include(":app")
+include(":terminal-emulator")
+include(":terminal-view")
