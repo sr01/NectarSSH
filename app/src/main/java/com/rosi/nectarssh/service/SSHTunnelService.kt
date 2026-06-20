@@ -314,7 +314,7 @@ class SSHTunnelService : Service() {
             logToSession(sessionId, LogLevel.INFO, "Authentication successful")
 
             val session = ssh.startSession()
-            session.allocatePTY("vt100", 120, 40, 0, 0, emptyMap())
+            session.allocatePTY("xterm-256color", 50, 30, 0, 0, emptyMap())
             
             updateSessionState(sessionId) { 
                 it.copy(sshClient = ssh, session = session)
