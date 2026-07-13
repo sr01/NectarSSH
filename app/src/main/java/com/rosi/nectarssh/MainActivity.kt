@@ -59,8 +59,6 @@ import com.rosi.nectarssh.data.RecentType
 import com.rosi.nectarssh.service.SSHTunnelService
 import com.rosi.nectarssh.ui.theme.NectarSSHTheme
 import com.rosi.nectarssh.util.PermissionHelper
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-import java.security.Security
 import java.util.UUID
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Public
@@ -70,10 +68,6 @@ import androidx.compose.material.icons.filled.SettingsEthernet
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Initialize BouncyCastle security provider for SSH cryptography
-        Security.removeProvider("BC")
-        Security.insertProviderAt(BouncyCastleProvider(), 1)
 
         enableEdgeToEdge()
         setContent {
