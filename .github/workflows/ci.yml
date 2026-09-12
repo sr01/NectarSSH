@@ -41,11 +41,17 @@ jobs:
         env:
           DEBUG_KEYSTORE_PATH: ${{ github.workspace }}/debug.keystore
 
+      # Three days is plenty: the release job below downloads this artifact
+      # within the same run, and a tagged build's APK is kept permanently as
+      # a release asset, which is stored outside the Actions storage
+      # allowance. At ~21MB a build, the 90-day default let these pile up to
+      # more than half the account's whole allowance.
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          retention-days: 3
 
   release:
     needs: build
